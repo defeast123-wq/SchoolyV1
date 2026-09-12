@@ -1592,7 +1592,47 @@ body.cursor-soft #customCursor{
                 </div>
             </article>
         </div>
+    </div>
+</section>
 
+<div class="game-modal" id="gameModal" aria-hidden="true">
+    <div class="game-modal-box" role="dialog" aria-modal="true" aria-label="Game player">
+        <div class="game-modal-toolbar">
+            <div class="game-modal-title" id="gameModalTitle">Game</div>
+            <div class="game-modal-actions">
+                <button type="button" id="gameFullscreen">⛶ Fullscreen</button>
+                <button type="button" id="gameClose">✕ Close</button>
+            </div>
+        </div>
+        <iframe
+            id="gameFrame"
+            title="Schooly Game Player"
+            allow="autoplay; fullscreen; gamepad; pointer-lock; clipboard-read; clipboard-write"
+            allowfullscreen
+            referrerpolicy="no-referrer">
+        </iframe>
+    </div>
+</div>
+
+<section id="moviesPage" class="page">
+    <header class="page-header">
+        <div class="page-title">Movies</div>
+
+        <div class="movie-actions">
+            <button class="back-button" id="movieFullscreen">⛶ Fullscreen</button>
+            <button class="back-button" data-back>← Home</button>
+        </div>
+    </header>
+
+    <div class="movie-browser">
+        <iframe
+            id="movieFrame"
+            src="https://cinera.cfd/"
+            title="Schooly Movies"
+            allowfullscreen
+            loading="eager"
+            referrerpolicy="no-referrer">
+        </iframe>
     </div>
 </section>
 
@@ -2411,20 +2451,6 @@ document.getElementById("resetSettings").addEventListener("click",()=>{
 })();
 </script>
 
-
-
-<div class="game-modal" id="gameModal" aria-hidden="true">
-    <div class="game-modal-box" role="dialog" aria-modal="true" aria-labelledby="gameModalTitle">
-        <div class="game-modal-toolbar">
-            <div class="game-modal-title" id="gameModalTitle">Game</div>
-            <div class="game-modal-actions">
-                <button type="button" id="gameFullscreen">⛶ Fullscreen</button>
-                <button type="button" id="gameClose">✕ Close</button>
-            </div>
-        </div>
-        <iframe id="gameFrame" title="Game player" allow="fullscreen; autoplay; gamepad; pointer-lock" allowfullscreen></iframe>
-    </div>
-</div>
 
 <script>
 /* Featured games */
