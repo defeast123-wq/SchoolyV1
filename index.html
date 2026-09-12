@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schooly</title>
+
+<style>
+:root{
+    --bg:#050308;
+    --panel:rgba(18,9,28,.82);
+    --primary:#9b5cff;
+    --primary-bright:#bd8cff;
+    --primary-dark:#54248c;
+    --text:#fff;
+    --text-secondary:#b9afc5;
+    --muted:#776c82;
+    --border:rgba(166,102,255,.22);
+    --button-bg:rgba(255,255,255,.045);
+    --shadow:rgba(124,58,237,.32);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{
+    width:100%;
+    height:100%;
+}
+
+body{
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+        radial-gradient(
+            circle at var(--mouse-x,50%) var(--mouse-y,35%),
+            rgba(155,92,255,.17) 0%,
+            rgba(126,53,216,.08) 11%,
+            rgba(126,53,216,.025) 27%,
+            transparent 46%
+        ),
+        radial-gradient(circle at 50% 35%,rgba(126,53,216,.12),transparent 35%),
+        var(--bg);
+    background-attachment:fixed;
+    color:var(--text);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+}
+
+body.no-animations *{
+    animation-duration:0s!important;
+    animation-delay:0s!important;
+    transition-duration:0s!important;
+}
+
+#snowCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:1;
+}
+
+#app{
+    position:relative;
+    width:100%;
+    height:100%;
+    z-index:2;
+}
+
+.page{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(14px) scale(.985);
+    transition:opacity .32s ease,transform .32s ease;
+    overflow-y:auto;
+}
+
+.page.active{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateY(0) scale(1);
+}
+
+#homePage{
+    align-items:center;
+    justify-content:center;
+    padding:40px 20px 80px;
+}
+
+.schooly-home-footer{
+    position:absolute;
+    left:50%;
+    bottom:18px;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    white-space:nowrap;
+    z-index:3;
+}
+
+.schooly-footer-button{
+    border:0;
+    outline:0;
+    background:none;
+    padding:0;
+    margin:0;
+    color:var(--muted);
+    font:500 11px Inter,ui-sans-serif,system-ui,sans-serif;
+    cursor:pointer;
+    transition:color .18s ease,text-shadow .18s ease;
+}
+
+.schooly-footer-button:hover{
+    color:var(--text-secondary);
+    text-shadow:0 0 12px rgba(189,140,255,.35);
+}
+
+.schooly-footer-dot{
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:var(--muted);
+    opacity:.7;
+}
+
+.home-content{
+    width:min(900px,100%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:48px;
+}
+
+.brand{
+    position:relative;
+    font-size:clamp(64px,10vw,128px);
+    font-weight:900;
+    letter-spacing:-.075em;
+    line-height:.9;
+    color:white;
+    user-select:none;
+    cursor:pointer;
+    transform-style:preserve-3d;
+    will-change:transform;
+    perspective:1000px;
+    text-shadow:
+        1px 1px 0 #d9c7ff,
+        2px 2px 0 #bca2ff,
+        3px 3px 0 #9b78ee,
+        4px 4px 0 #7954c7,
+        5px 5px 0 #54358f,
+        0 0 18px rgba(255,255,255,.35),
+        0 0 48px rgba(155,92,255,.45);
+    animation:schoolyBrandSpin 9s linear infinite;
+    transition:transform .15s ease-out,filter .3s ease;
+}
+
+.brand::before,
+.brand::after{
+    content:"Schooly";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    font:inherit;
+    letter-spacing:inherit;
+    line-height:inherit;
+    color:transparent;
+    transform-style:preserve-3d;
+}
+
+.brand::before{
+    transform:translateZ(-10px);
+    -webkit-text-stroke:1px rgba(155,92,255,.45);
+    text-shadow:
+        0 0 22px rgba(155,92,255,.35),
+        0 0 55px rgba(155,92,255,.2);
+    z-index:-1;
+}
+
+.brand::after{
+    transform:translateZ(8px);
+    -webkit-text-stroke:1px rgba(255,255,255,.08);
+}
+
+@keyframes schoolyBrandSpin{
+    0%   { transform:perspective(1000px) rotateX(7deg) rotateY(-12deg); }
+    25%  { transform:perspective(1000px) rotateX(7deg) rotateY(78deg); }
+    50%  { transform:perspective(1000px) rotateX(7deg) rotateY(168deg); }
+    75%  { transform:perspective(1000px) rotateX(7deg) rotateY(258deg); }
+    100% { transform:perspective(1000px) rotateX(7deg) rotateY(348deg); }
+}
+
+.brand:hover{
+    filter:brightness(1.12) saturate(1.08);
+    text-shadow:
+        1px 1px 0 #e5d8ff,
+        2px 2px 0 #c9b2ff,
+        3px 3px 0 #a47ff0,
+        4px 4px 0 #7d59ca,
+        5px 5px 0 #563891,
+        0 0 18px rgba(255,255,255,.8),
+        0 0 48px var(--primary),
+        0 0 95px var(--primary);
+}
+
+.brand:hover::before{
+    filter:drop-shadow(0 0 18px var(--primary));
+}
+
+.brand-subtitle{
+    margin-top:-28px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text-secondary);
+    letter-spacing:.25em;
+    text-transform:uppercase;
+}
+
+.main-nav{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(110px,150px));
+    gap:14px;
+    width:100%;
+    justify-content:center;
+}
+
+.nav-button{
+    position:relative;
+    min-height:112px;
+    border:1px solid var(--border);
+    border-radius:22px;
+    background:
+        linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018)),
+        var(--button-bg);
+    color:white;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    overflow:hidden;
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease;
+}
+
+.nav-button::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);
+    transform:translateX(-120%);
+    transition:transform .55s ease;
+}
+
+.nav-button:hover{
+    transform:translateY(-6px) scale(1.025);
+    border-color:rgba(183,127,255,.62);
+    background:linear-gradient(145deg,rgba(139,75,231,.16),rgba(255,255,255,.035));
+    box-shadow:0 18px 45px rgba(0,0,0,.35),0 0 28px var(--shadow);
+}
+
+.nav-button:hover::before{
+    transform:translateX(120%);
+}
+
+.nav-button:active{
+    transform:translateY(-2px) scale(.985);
+}
+
+.nav-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:42px;
+    height:42px;
+    margin:0 auto 12px;
+    color:var(--primary-bright);
+    filter:drop-shadow(0 0 12px var(--primary));
+    transition:transform .22s ease,filter .22s ease,color .22s ease;
+}
+
+.nav-icon svg{
+    width:30px;
+    height:30px;
+    display:block;
+}
+
+.nav-button:hover .nav-icon{
+    color:#fff;
+    transform:translateY(-2px) scale(1.08);
+    filter:drop-shadow(0 0 8px var(--primary))
+           drop-shadow(0 0 18px var(--primary));
+}
+
+ .page-header{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:24px 28px;
+}
+
+.movie-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.movie-browser{
+    position:relative;
+    flex:1;
+    min-height:0;
+    width:min(1400px,96%);
+    margin:0 auto 24px;
+    border:1px solid var(--border);
+    border-radius:20px;
+    overflow:hidden;
+    background:#050505;
+    box-shadow:0 20px 70px rgba(0,0,0,.35);
+}
+
+.movie-browser iframe,
+ .music-browser iframe{
+    display:block;
+    width:100%;
+    height:100%;
+    min-height:calc(100vh - 105px);
+    border:0;
+    background:#050505;
+}
+
+.page-title{
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-.03em;
+}
+
+.back-button{
+    border:1px solid var(--border);
+    background:var(--button-bg);
+    color:white;
+    border-radius:12px;
+    padding:10px 15px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.back-button:hover{
+    background:rgba(155,92,255,.16);
+    border-color:rgba(184,136,255,.6);
+    transform:translateY(-2px);
+}
+
+.blank-page-center{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    font-size:14px;
+    text-align:center;
+    padding:30px;
+}
+
+#settingsPage{
+    background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.22));
+}
+
+.settings-container{
+    width:min(1100px,94%);
+    margin:0 auto 40px;
+    padding:6px 0 40px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:16px;
+}
+
+.settings-card{
+    border:1px solid var(--border);
+    background:rgba(12,7,19,.74);
+    border-radius:20px;
+    padding:22px;
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+}
+
+.settings-card h2{
+    font-size:16px;
+    margin-bottom:5px;
+}
+
+.settings-card>p{
+    color:var(--text-secondary);
+    font-size:12px;
+    line-height:1.5;
+    margin-bottom:17px;
+}
+
+.setting-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:14px 0;
+    border-top:1px solid rgba(255,255,255,.055);
+}
+
+.setting-row:first-of-type{border-top:none}
+
+.setting-info{min-width:0}
+
+.setting-name{
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.setting-description{
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.4;
+}
+
+.schooly-select{
+    min-width:145px;
+    padding:10px 11px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:11px;
+    outline:none;
+    background:#100a17;
+    color:white;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.schooly-select:focus{border-color:var(--primary)}
+
+.range-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:180px;
+}
+
+.range-wrap input{width:130px}
+
+.range-value{
+    color:var(--text-secondary);
+    min-width:35px;
+    text-align:right;
+    font-size:11px;
+}
+
+input[type="range"]{
+    appearance:none;
+    height:4px;
+    border-radius:50px;
+    background:#30263a;
+    outline:none;
+}
+
+input[type="range"]::-webkit-slider-thumb{
+    appearance:none;
+    width:15px;
+    height:15px;
+    border-radius:50%;
+    background:var(--primary);
+    box-shadow:0 0 12px var(--primary);
+    cursor:pointer;
+}
+
+.toggle{
+    position:relative;
+    width:46px;
+    height:26px;
+    flex:0 0 auto;
+    border:none;
+    border-radius:999px;
+    background:#28212f;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.toggle::after{
+    content:"";
+    position:absolute;
+    width:20px;
+    height:20px;
+    top:3px;
+    left:3px;
+    border-radius:50%;
+    background:#8b8192;
+    transition:.2s ease;
+}
+
+.toggle.active{background:var(--primary-dark)}
+
+.toggle.active::after{
+    left:23px;
+    background:white;
+    box-shadow:0 0 12px var(--primary);
+}
+
+.theme-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:9px;
+}
+
+.theme-option{
+    min-height:70px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:13px;
+    background:#111;
+    color:white;
+    padding:10px;
+    text-align:left;
+    cursor:pointer;
+    transition:transform .18s ease,border .18s ease,box-shadow .18s ease;
+}
+
+.theme-option:hover{transform:translateY(-2px)}
+
+.theme-option.active{
+    border-color:white;
+    box-shadow:0 0 0 2px rgba(255,255,255,.12);
+}
+
+.theme-color{
+    display:flex;
+    gap:4px;
+    margin-bottom:8px;
+}
+
+.theme-color span{
+    display:block;
+    width:19px;
+    height:19px;
+    border-radius:6px;
+}
+
+.theme-name{
+    font-size:11px;
+    font-weight:700;
+}
+
+.cursor-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+}
+
+.cursor-option{
+    min-height:55px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:12px;
+    background:rgba(255,255,255,.025);
+    color:white;
+    font-size:11px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.18s ease;
+}
+
+.cursor-option:hover{
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,.23);
+}
+
+.cursor-option.active{
+    border-color:var(--primary);
+    box-shadow:0 0 22px rgba(155,92,255,.2);
+}
+
+.settings-footer{
+    width:min(1100px,94%);
+    margin:0 auto 35px;
+    color:var(--muted);
+    text-align:center;
+    font-size:11px;
+    padding-top:10px;
+}
+
+#customCursor{
+    position:fixed;
+    width:16px;
+    height:16px;
+    left:0;
+    top:0;
+    pointer-events:none;
+    z-index:99999;
+    transform:translate(-50%,-50%);
+    display:none;
+}
+
+#customCursor.active{display:block}
+
+body.cursor-dot,
+body.cursor-purple-ring,
+body.cursor-crosshair,
+body.cursor-soft{
+    cursor:none;
+}
+
+body.cursor-dot #customCursor{
+    width:9px;
+    height:9px;
+    background:var(--primary-bright);
+    border-radius:50%;
+    box-shadow:0 0 10px var(--primary),0 0 25px var(--primary);
+    mix-blend-mode:screen;
+}
+
+body.cursor-purple-ring #customCursor{
+    width:23px;
+    height:23px;
+    border:2px solid var(--primary-bright);
+    border-radius:50%;
+    box-shadow:0 0 12px var(--primary);
+}
+
+body.cursor-purple-ring.cursor-hover #customCursor{
+    width:34px;
+    height:34px;
+    border-color:white;
+}
+
+body.cursor-crosshair #customCursor{
+    width:18px;
+    height:18px;
+}
+
+body.cursor-crosshair #customCursor::before,
+body.cursor-crosshair #customCursor::after{
+    content:"";
+    position:absolute;
+    background:var(--primary-bright);
+    box-shadow:0 0 8px var(--primary);
+}
+
+body.cursor-crosshair #customCursor::before{
+    width:2px;
+    height:22px;
+    top:-2px;
+    left:8px;
+}
+
+body.cursor-crosshair #customCursor::after{
+    width:22px;
+    height:2px;
+    top:8px;
+    left:-2px;
+}
+
+body.cursor-soft #customCursor{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.45);
+    background:radial-gradient(circle,rgba(155,92,255,.12),transparent 65%);
+    box-shadow:0 0 35px rgba(155,92,255,.18);
+}
+
+@media(max-width:800px){
+    .main-nav{
+        grid-template-columns:repeat(2,minmax(120px,150px));
+    }
+    .settings-container{grid-template-columns:1fr}
+    .theme-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:460px){
+    #homePage{padding-bottom:78px}
+    .schooly-home-footer{bottom:14px}
+
+    .movie-actions{
+        gap:5px;
+    }
+
+    .movie-actions .back-button{
+        padding:9px 10px;
+        font-size:11px;
+    }
+
+    .movie-browser{
+        width:96%;
+        margin-bottom:12px;
+        border-radius:15px;
+    }
+
+    .movie-browser iframe{
+        min-height:calc(100vh - 90px);
+    }
+
+    .home-content{gap:34px}
+    .brand{font-size:65px}
+    .main-nav{
+        grid-template-columns:repeat(2,minmax(105px,1fr));
+        width:100%;
+    }
+    .nav-button{min-height:95px}
+    .settings-card{padding:17px}
+    .setting-row{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+    .range-wrap{width:100%}
+    .range-wrap input{
+        flex:1;
+        width:auto;
+    }
+}
+/* Music library — YouTube/Piped */
+.music-page-content{
+    width:min(1400px,96%);
+    margin:0 auto 24px;
+    min-height:0;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+.music-browser{
+    position:relative;
+    width:100%;
+    min-height:0;
+    flex:1;
+    border:1px solid var(--border);
+    border-radius:20px;
+    overflow:hidden;
+    background:linear-gradient(145deg,rgba(18,9,28,.96),rgba(5,5,8,.99));
+    box-shadow:0 20px 70px rgba(0,0,0,.35),0 0 35px var(--shadow);
+    display:flex;
+    flex-direction:column;
+}
+.music-toolbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    background:rgba(8,5,12,.86);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+}
+.music-search-wrap{
+    flex:1;
+    min-width:0;
+    position:relative;
+}
+.music-search{
+    width:100%;
+    height:46px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:14px;
+    outline:none;
+    background:rgba(255,255,255,.055);
+    color:white;
+    padding:0 48px 0 45px;
+    font:600 13px Inter,ui-sans-serif,system-ui,sans-serif;
+    transition:.2s ease;
+}
+.music-search:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(155,92,255,.11),0 0 22px rgba(155,92,255,.16);
+}
+.music-search-icon{
+    position:absolute;
+    left:15px;
+    top:50%;
+    width:18px;
+    height:18px;
+    transform:translateY(-50%);
+    color:var(--text-secondary);
+    pointer-events:none;
+}
+.music-search-clear{
+    position:absolute;
+    right:9px;
+    top:50%;
+    transform:translateY(-50%);
+    width:30px;
+    height:30px;
+    border:0;
+    border-radius:9px;
+    background:transparent;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:17px;
+}
+.music-search-clear:hover{background:rgba(255,255,255,.06);color:white}
+.music-search-button{
+    height:46px;
+    padding:0 18px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    background:linear-gradient(145deg,var(--primary),var(--primary-dark));
+    color:white;
+    font:800 13px Inter,ui-sans-serif,system-ui,sans-serif;
+    cursor:pointer;
+    box-shadow:0 10px 25px rgba(0,0,0,.18),0 0 20px rgba(155,92,255,.16);
+    transition:.2s ease;
+}
+.music-search-button:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.music-content{
+    min-height:0;
+    flex:1;
+    overflow:auto;
+    padding:10px 14px 18px;
+}
+.music-artist-bar{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:2px 2px 12px;
+    scrollbar-width:none;
+}
+.music-artist-bar::-webkit-scrollbar{display:none}
+.music-chip{
+    white-space:nowrap;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.035);
+    color:var(--text-secondary);
+    border-radius:999px;
+    padding:8px 13px;
+    font:700 11px Inter,ui-sans-serif,system-ui,sans-serif;
+    cursor:pointer;
+    transition:.18s ease;
+}
+.music-chip:hover,.music-chip.active{
+    color:white;
+    border-color:rgba(187,140,255,.55);
+    background:rgba(155,92,255,.14);
+}
+.music-section-title{
+    display:flex;
+    align-items:end;
+    justify-content:space-between;
+    gap:12px;
+    padding:3px 2px 12px;
+}
+.music-section-title h2{font-size:17px;letter-spacing:-.02em}
+.music-section-title span{color:var(--muted);font-size:11px}
+.music-results{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:10px;
+}
+.music-card{
+    min-width:0;
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:15px;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+    padding:9px;
+    cursor:pointer;
+    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.music-card:hover{
+    transform:translateY(-3px);
+    border-color:rgba(187,140,255,.42);
+    box-shadow:0 14px 34px rgba(0,0,0,.25),0 0 22px rgba(155,92,255,.09);
+    background:linear-gradient(145deg,rgba(155,92,255,.11),rgba(255,255,255,.025));
+}
+.music-card.active{
+    border-color:var(--primary);
+    box-shadow:0 0 0 1px rgba(155,92,255,.18),0 0 25px rgba(155,92,255,.13);
+}
+.music-art-wrap{position:relative;aspect-ratio:16/9;margin-bottom:9px}
+.music-art{
+    display:block;
+    width:100%;
+    height:100%;
+    border-radius:11px;
+    object-fit:cover;
+    background:#130d18;
+}
+.music-card-play{
+    position:absolute;
+    right:7px;
+    bottom:7px;
+    width:37px;
+    height:37px;
+    border:none;
+    border-radius:50%;
+    background:var(--primary);
+    color:white;
+    display:grid;
+    place-items:center;
+    box-shadow:0 7px 18px rgba(0,0,0,.36),0 0 16px rgba(155,92,255,.32);
+    opacity:0;
+    transform:translateY(4px);
+    transition:.18s ease;
+    pointer-events:none;
+}
+.music-card:hover .music-card-play,.music-card.active .music-card-play{
+    opacity:1;
+    transform:translateY(0);
+}
+.music-card-title{
+    font-size:12px;
+    font-weight:800;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    margin-bottom:3px;
+}
+.music-card-artist{
+    font-size:10px;
+    color:var(--text-secondary);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.music-card-meta{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    margin-top:7px;
+    font-size:8px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+}
+.music-empty,.music-loading,.music-error{
+    min-height:280px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:var(--muted);
+    gap:10px;
+    padding:30px;
+}
+.music-empty strong,.music-loading strong,.music-error strong{color:white;font-size:15px}
+.music-empty p,.music-loading p,.music-error p{max-width:520px;line-height:1.55;font-size:12px}
+.music-spinner{
+    width:28px;
+    height:28px;
+    border:3px solid rgba(255,255,255,.10);
+    border-top-color:var(--primary-bright);
+    border-radius:50%;
+    animation:musicSpin .8s linear infinite;
+}
+@keyframes musicSpin{to{transform:rotate(360deg)}}
+.music-load-more{
+    display:block;
+    margin:16px auto 4px;
+    min-width:150px;
+    height:40px;
+    padding:0 16px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:11px;
+    background:rgba(255,255,255,.05);
+    color:white;
+    font:800 11px Inter,ui-sans-serif,system-ui,sans-serif;
+    cursor:pointer;
+}
+.music-load-more:hover{background:rgba(155,92,255,.12);border-color:var(--primary)}
+.music-player{
+    border-top:1px solid rgba(255,255,255,.07);
+    background:rgba(7,5,10,.97);
+    padding:12px 14px;
+    box-shadow:0 -15px 40px rgba(0,0,0,.25);
+}
+.music-player-main{
+    display:grid;
+    grid-template-columns:minmax(190px,1fr) minmax(300px,1.6fr) minmax(170px,.8fr);
+    gap:18px;
+    align-items:center;
+}
+.music-now{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+}
+.music-now-art{
+    width:52px;
+    height:52px;
+    border-radius:11px;
+    object-fit:cover;
+    background:#130d18;
+    flex:0 0 auto;
+}
+.music-now-copy{min-width:0}
+.music-now-title,.music-now-artist{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.music-now-title{font-size:12px;font-weight:800;margin-bottom:3px}
+.music-now-artist{font-size:10px;color:var(--text-secondary)}
+.music-controls{display:flex;flex-direction:column;gap:7px;min-width:0}
+.music-buttons{display:flex;align-items:center;justify-content:center;gap:10px}
+.music-control{
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:50%;
+    background:rgba(255,255,255,.055);
+    color:white;
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    transition:.16s ease;
+}
+.music-control:hover{background:rgba(255,255,255,.10);transform:scale(1.05)}
+.music-control.primary{
+    width:42px;
+    height:42px;
+    background:var(--primary);
+    box-shadow:0 0 18px rgba(155,92,255,.27);
+}
+.music-progress-row{
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr) 42px;
+    align-items:center;
+    gap:8px;
+}
+.music-time{font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums}
+.music-range{
+    width:100%;
+    appearance:none;
+    height:4px;
+    border-radius:99px;
+    background:#2a2232;
+    outline:none;
+    cursor:pointer;
+}
+.music-range::-webkit-slider-thumb{
+    appearance:none;
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    background:var(--primary);
+    box-shadow:0 0 10px rgba(155,92,255,.45);
+}
+.music-range::-moz-range-thumb{
+    width:13px;
+    height:13px;
+    border:0;
+    border-radius:50%;
+    background:var(--primary);
+}
+.music-volume{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:9px;
+}
+.music-volume .music-range{width:88px}
+.music-label{font-size:10px;color:var(--muted)}
+.music-source-link{
+    color:var(--muted);
+    font-size:9px;
+    text-decoration:none;
+}
+.music-source-link:hover{color:white}
+@media(max-width:1200px){
+    .music-results{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .music-player-main{grid-template-columns:1fr;gap:10px}
+    .music-now,.music-volume{justify-content:center}
+}
+@media(max-width:900px){.music-results{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){
+    .music-toolbar{flex-wrap:wrap}
+    .music-search-wrap{order:1;flex-basis:100%}
+    .music-search-button{order:2;flex:1}
+    .music-results{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:460px){
+    .music-page-content{width:96%;margin-bottom:12px}
+    .music-browser{border-radius:15px}
+    .music-content{padding:10px}
+    .music-results{gap:8px}
+    .music-card{padding:7px}
+    .music-card-title{font-size:11px}
+    .music-card-artist{font-size:9px}
+    .music-player{padding:10px}
+    .music-progress-row{grid-template-columns:34px minmax(0,1fr) 34px;gap:6px}
+}
+
+/* Policy + Contact pages */
+.policy-page-content{
+    width:min(1000px,92%);
+    margin:0 auto 40px;
+    padding:8px 0 40px;
+}
+.policy-card{
+    border:1px solid var(--border);
+    background:rgba(12,7,19,.78);
+    border-radius:22px;
+    padding:30px;
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 20px 70px rgba(0,0,0,.25),0 0 30px var(--shadow);
+}
+.policy-updated{
+    color:var(--primary-bright);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin-bottom:22px;
+}
+.policy-card h2{
+    font-size:16px;
+    margin:24px 0 7px;
+}
+.policy-card h2:first-of-type{margin-top:0}
+.policy-card p{
+    color:var(--text-secondary);
+    font-size:13px;
+    line-height:1.65;
+}
+.contact-card{
+    width:min(760px,92%);
+    margin:20px auto 50px;
+    padding:42px 34px;
+    border:1px solid var(--border);
+    border-radius:26px;
+    background:
+        radial-gradient(circle at 50% 0%,rgba(155,92,255,.16),transparent 45%),
+        rgba(12,7,19,.82);
+    backdrop-filter:blur(22px);
+    -webkit-backdrop-filter:blur(22px);
+    box-shadow:0 25px 80px rgba(0,0,0,.35),0 0 45px var(--shadow);
+    text-align:center;
+}
+.contact-icon{
+    width:66px;
+    height:66px;
+    margin:0 auto 20px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(189,140,255,.28);
+    border-radius:20px;
+    color:var(--primary-bright);
+    background:rgba(155,92,255,.10);
+    box-shadow:0 0 30px rgba(155,92,255,.16);
+}
+.contact-icon svg{width:32px;height:32px}
+.contact-card h2{
+    font-size:30px;
+    letter-spacing:-.04em;
+    margin-bottom:10px;
+}
+.contact-card>p{
+    max-width:570px;
+    margin:0 auto;
+    color:var(--text-secondary);
+    font-size:14px;
+    line-height:1.7;
+}
+.contact-suggestion{
+    margin:25px auto;
+    padding:18px 20px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:17px;
+    background:rgba(255,255,255,.035);
+    color:#fff;
+    font-size:13px;
+    line-height:1.6;
+}
+.contact-suggestion strong{color:var(--primary-bright)}
+.contact-email{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    margin-top:5px;
+    padding:13px 20px;
+    border:1px solid rgba(189,140,255,.32);
+    border-radius:13px;
+    background:linear-gradient(145deg,var(--primary),var(--primary-dark));
+    color:white;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:800;
+    box-shadow:0 12px 30px rgba(0,0,0,.22),0 0 24px rgba(155,92,255,.18);
+    transition:transform .18s ease,filter .18s ease,box-shadow .18s ease;
+}
+.contact-email:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+    box-shadow:0 16px 36px rgba(0,0,0,.28),0 0 32px rgba(155,92,255,.28);
+}
+.contact-address{
+    margin-top:14px;
+    color:var(--muted);
+    font-size:11px;
+}
+@media(max-width:460px){
+    .contact-card{padding:32px 20px}
+    .contact-card h2{font-size:25px}
+    .policy-card{padding:22px}
+    .policy-page-content{width:94%}
+}
+
+
+/* =========================
+   FEATURED GAMES
+   ========================= */
+.games-page-content{
+    width:min(1450px,94%);
+    margin:0 auto 35px;
+    padding-bottom:30px;
+}
+.games-intro{
+    text-align:center;
+    margin:5px auto 25px;
+}
+.games-intro h2{
+    margin:0 0 7px;
+    font-size:28px;
+    color:#fff;
+}
+.games-intro p{
+    margin:0;
+    color:var(--text-secondary);
+    font-size:14px;
+}
+.featured-label{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin:0 0 15px;
+}
+.featured-label h3{
+    margin:0;
+    font-size:18px;
+    color:#fff;
+}
+.featured-count{
+    padding:6px 10px;
+    border:1px solid rgba(155,92,255,.3);
+    border-radius:999px;
+    background:rgba(155,92,255,.08);
+    color:#d8c9ff;
+    font-size:12px;
+}
+.games-grid{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:16px;
+}
+.game-card{
+    position:relative;
+    min-width:0;
+    overflow:hidden;
+    border:1px solid var(--border);
+    border-radius:18px;
+    background:linear-gradient(145deg,rgba(20,13,32,.96),rgba(7,6,11,.98));
+    box-shadow:0 14px 35px rgba(0,0,0,.28);
+    transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+    cursor:pointer;
+}
+.game-card:hover{
+    transform:translateY(-6px);
+    border-color:rgba(183,127,255,.65);
+    box-shadow:0 22px 50px rgba(0,0,0,.42),0 0 25px rgba(155,92,255,.13);
+}
+.game-thumb{
+    position:relative;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    background:#08070d;
+}
+.game-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform .35s ease,filter .35s ease;
+}
+.game-card:hover .game-thumb img{
+    transform:scale(1.06);
+    filter:brightness(.72);
+}
+.game-play-overlay{
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    opacity:0;
+    transition:opacity .2s ease;
+    background:rgba(0,0,0,.28);
+}
+.game-card:hover .game-play-overlay{
+    opacity:1;
+}
+.game-play-circle{
+    width:58px;
+    height:58px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:rgba(155,92,255,.92);
+    color:#fff;
+    font-size:23px;
+    box-shadow:0 0 30px rgba(155,92,255,.48);
+}
+.game-badge{
+    position:absolute;
+    left:10px;
+    top:10px;
+    z-index:2;
+    padding:5px 8px;
+    border-radius:999px;
+    background:rgba(8,5,15,.82);
+    border:1px solid rgba(255,255,255,.16);
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    backdrop-filter:blur(8px);
+}
+.game-info{
+    padding:13px;
+}
+.game-title{
+    margin:0 0 5px;
+    font-size:16px;
+    color:#fff;
+}
+.game-description{
+    margin:0 0 13px;
+    min-height:36px;
+    color:var(--text-secondary);
+    font-size:12px;
+    line-height:1.5;
+}
+.game-play-button{
+    width:100%;
+    border:1px solid rgba(155,92,255,.38);
+    border-radius:10px;
+    padding:9px 10px;
+    background:rgba(155,92,255,.09);
+    color:#eee;
+    font:inherit;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.18s ease;
+}
+.game-play-button:hover{
+    background:rgba(155,92,255,.2);
+    border-color:rgba(183,127,255,.7);
+}
+.game-modal{
+    position:fixed;
+    inset:0;
+    z-index:100000;
+    display:none;
+    padding:22px;
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(10px);
+}
+.game-modal.open{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.game-modal-box{
+    width:min(1500px,100%);
+    height:min(900px,94vh);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    border:1px solid rgba(183,127,255,.35);
+    border-radius:18px;
+    background:#07060b;
+    box-shadow:0 30px 100px rgba(0,0,0,.7),0 0 50px rgba(155,92,255,.12);
+}
+.game-modal-toolbar{
+    min-height:55px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 12px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(12,8,20,.97);
+}
+.game-modal-title{
+    color:#fff;
+    font-weight:700;
+    font-size:15px;
+}
+.game-modal-actions{
+    display:flex;
+    gap:8px;
+}
+.game-modal-actions button{
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:9px;
+    padding:8px 11px;
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    font:inherit;
+    font-size:12px;
+    cursor:pointer;
+}
+.game-modal-actions button:hover{
+    background:rgba(155,92,255,.17);
+    border-color:rgba(183,127,255,.5);
+}
+#gameFrame{
+    width:100%;
+    flex:1;
+    min-height:0;
+    border:0;
+    background:#000;
+}
+@media(max-width:1150px){
+    .games-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:720px){
+    .games-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .games-page-content{width:94%}
+}
+@media(max-width:470px){
+    .games-grid{grid-template-columns:1fr}
+    .game-modal{padding:8px}
+    .game-modal-box{height:96vh;border-radius:12px}
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="snowCanvas"></canvas>
+<div id="customCursor"></div>
+
+<div id="app">
+
+<section id="homePage" class="page active">
+    <div class="home-content">
+
+        <div class="brand" id="brand">Schooly</div>
+
+        <div class="brand-subtitle">Everything in one place</div>
+
+        <div class="main-nav">
+
+            <button class="nav-button" data-page="gamePage">
+                <span class="nav-icon nav-icon-game" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M7.2 8.2h9.6c2.9 0 4.6 2 5.1 5.3.5 3.3-.8 5.2-2.7 5.2-1.4 0-2.5-1-3.4-2.5H8.2c-.9 1.5-2 2.5-3.4 2.5-1.9 0-3.2-1.9-2.7-5.2C2.6 10.2 4.3 8.2 7.2 8.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <path d="M7 12v3M5.5 13.5h3M17.2 13h.1M19.2 11.5h.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                Game
+            </button>
+
+            <button class="nav-button" data-page="moviesPage">
+                <span class="nav-icon nav-icon-movie" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="3.2" y="5.2" width="17.6" height="13.6" rx="2.7" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M3.6 9h16.8M8 5.5l-2.1 3.3M13 5.5l-2.1 3.3M18 5.5l-2.1 3.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                        <path d="m10 12 5 2.2-5 2.2V12Z" fill="currentColor"/>
+                    </svg>
+                </span>
+                Movies
+            </button>
+
+            <button class="nav-button" data-page="musicPage">
+                <span class="nav-icon nav-icon-music" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18.2V6.7L19 4v11.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="6.7" cy="18.2" r="2.6" stroke="currentColor" stroke-width="1.7"/>
+                        <circle cx="16.7" cy="15.2" r="2.6" stroke="currentColor" stroke-width="1.7"/>
+                        <path d="M9 9.4 19 6.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                Music
+            </button>
+
+            <button class="nav-button" data-page="settingsPage">
+                <span class="nav-icon nav-icon-settings" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M9.7 3.9h4.6l.6 2a6.9 6.9 0 0 1 1.4.8l1.9-.8 2.3 4-1.6 1.3c.1.4.1.9.1 1.4s0 .9-.1 1.4l1.6 1.3-2.3 4-1.9-.8a6.9 6.9 0 0 1-1.4.8l-.6 2H9.7l-.6-2a6.9 6.9 0 0 1-1.4-.8l-1.9.8-2.3-4 1.6-1.3a7 7 0 0 1 0-2.8L3.5 10l2.3-4 1.9.8a6.9 6.9 0 0 1 1.4-.8l.6-2Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+                        <circle cx="12" cy="12" r="2.7" stroke="currentColor" stroke-width="1.6"/>
+                    </svg>
+                </span>
+                Settings
+            </button>
+
+        </div>
+    </div>
+
+    <div class="schooly-home-footer" aria-label="Schooly site links">
+        <button class="schooly-footer-button" data-page="policyPage" type="button">Policy</button>
+        <span class="schooly-footer-dot" aria-hidden="true"></span>
+        <button class="schooly-footer-button" data-page="legalPage" type="button">Legal</button>
+        <span class="schooly-footer-dot" aria-hidden="true"></span>
+        <button class="schooly-footer-button" data-page="contactPage" type="button">Contact</button>
+    </div>
+</section>
+
+<section id="gamePage" class="page">
+    <header class="page-header">
+        <div class="page-title">Games</div>
+        <button class="back-button" data-back type="button">← Home</button>
+    </header>
+
+    <div class="games-page-content">
+        <div class="games-intro">
+            <h2>Play Games</h2>
+            <p>Play browser games directly inside Schooly.</p>
+        </div>
+
+        <div class="featured-label">
+            <h3>Featured</h3>
+            <span class="featured-count">5 featured</span>
+        </div>
+
+        <div class="games-grid">
+            <article class="game-card" data-game-title="Polytrack"
+                data-game-url="https://kamilgamer1.github.io/Polytrack-0.6.0/">
+                <div class="game-thumb">
+                    <span class="game-badge">FEATURED</span>
+                    <img src="https://th.bing.com/th/id/OIP.9j9eivRQyBE8lRWe7IrNOwHaE8?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Polytrack">
+                    <div class="game-play-overlay"><div class="game-play-circle">▶</div></div>
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Polytrack</h4>
+                    <p class="game-description">Fast arcade racing with twisty tracks and drifting.</p>
+                    <button class="game-play-button" type="button">Play now →</button>
+                </div>
+            </article>
+
+            <article class="game-card" data-game-title="GTA Vice City"
+                data-game-url="https://joncodeofficial.github.io/gta-vice-city-wasm/">
+                <div class="game-thumb">
+                    <span class="game-badge">FEATURED</span>
+                    <img src="https://th.bing.com/th/id/OIP.qq_ur_2QScnMEUBq8CKBtQHaEo?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" alt="GTA Vice City">
+                    <div class="game-play-overlay"><div class="game-play-circle">▶</div></div>
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">GTA Vice City</h4>
+                    <p class="game-description">Browser port of Vice City. Import your own legally owned game files to play.</p>
+                    <button class="game-play-button" type="button">Play now →</button>
+                </div>
+            </article>
+
+            <article class="game-card" data-game-title="Tung Tung Basics"
+                data-game-url="https://raw.githack.com/web-ports/baldi-mods/main/t3/index.html">
+                <div class="game-thumb">
+                    <span class="game-badge">FEATURED</span>
+                    <img src="https://th.bing.com/th/id/OIP.QapZNNbnxvzRM64tbRxA_AHaEK?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Tung Tung Basics">
+                    <div class="game-play-overlay"><div class="game-play-circle">▶</div></div>
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Tung Tung Basics</h4>
+                    <p class="game-description">A chaotic browser horror-style school game.</p>
+                    <button class="game-play-button" type="button">Play now →</button>
+                </div>
+            </article>
+
+            <article class="game-card" data-game-title="Slop"
+                data-game-url="https://gamehtml5.github.io/play/slope.html">
+                <div class="game-thumb">
+                    <span class="game-badge">FEATURED</span>
+                    <img src="https://th.bing.com/th/id/OIP.l1kTG-bDX7XdxVESwGixkwHaEK?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Slop">
+                    <div class="game-play-overlay"><div class="game-play-circle">▶</div></div>
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Slop</h4>
+                    <p class="game-description">Jump into a weird and chaotic Unity browser game.</p>
+                    <button class="game-play-button" type="button">Play now →</button>
+                </div>
+            </article>
+
+            <article class="game-card" data-game-title="Super Mario 64"
+                data-game-url="https://notan127.github.io/SM64-PC-Port-WebGL/">
+                <div class="game-thumb">
+                    <span class="game-badge">FEATURED</span>
+                    <img src="https://th.bing.com/th/id/OIP.NJpccXzTJ0OHPflJYWgYJAHaEK?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Super Mario 64">
+                    <div class="game-play-overlay"><div class="game-play-circle">▶</div></div>
+                </div>
+                <div class="game-info">
+                    <h4 class="game-title">Super Mario 64</h4>
+                    <p class="game-description">Play the classic 3D platformer in your browser.</p>
+                    <button class="game-play-button" type="button">Play now →</button>
+                </div>
+            </article>
+        </div>
+
+    </div>
+</section>
+
+<section id="musicPage" class="page">
+    <header class="page-header">
+        <div class="page-title">Music</div>
+        <div class="movie-actions">
+            <button class="back-button" id="musicFullscreen">⛶ Fullscreen</button>
+            <button class="back-button" data-back>← Home</button>
+        </div>
+    </header>
+
+    <div style="padding: 24px;">
+        <h2 style="margin:0 0 16px;">Featured</h2>
+        <div style="display:flex; align-items:center; gap:18px; padding:18px; border-radius:16px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); max-width:760px;">
+            <img src="https://yt3.googleusercontent.com/g8HJXhzmfFe5v0nS1s6Uxwe8bqy7S3QCgzPEFizHlPQTCuoqaMZr7i_63BDwKBOPgzusEq0FhtHOWNnE=w544-h544-l90-rj" alt="Bottle V2 thumbnail" style="width:120px;height:120px;object-fit:cover;border-radius:12px;flex:none;">
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:20px;font-weight:700;margin-bottom:5px;">Bottle V2 (Unreleased)</div>
+                <div style="opacity:.7;margin-bottom:14px;">Featured</div>
+                <audio controls preload="metadata" style="width:100%;" src="https://cold-na-phx-3.gofile.io/download/web/4ab0b1d3-9636-47c7-8c58-beef21ab3842/Bottle%20V2.mp3">Your browser does not support audio playback.</audio>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="settingsPage" class="page">
+
+    <header class="page-header">
+        <div class="page-title">Settings</div>
+        <button class="back-button" data-back>← Home</button>
+    </header>
+
+    <div class="settings-container">
+
+        <div class="settings-card">
+            <h2>Appearance</h2>
+            <p>Customize the look and feel of Schooly.</p>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Theme</div>
+                    <div class="setting-description">Choose Schooly's color palette.</div>
+                </div>
+
+                <select class="schooly-select" id="themeSelect">
+                    <option value="purple">Purple Night</option>
+                    <option value="blue">Midnight Blue</option>
+                    <option value="emerald">Emerald</option>
+                    <option value="red">Crimson</option>
+                    <option value="pink">Pink Noir</option>
+                    <option value="orange">Sunset</option>
+                    <option value="mono">Monochrome</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">UI Scale</div>
+                    <div class="setting-description">Change the overall interface size.</div>
+                </div>
+
+                <div class="range-wrap">
+                    <input type="range" id="uiScale" min="85" max="115" value="100">
+                    <span class="range-value" id="uiScaleValue">100%</span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Glow Effects</div>
+                    <div class="setting-description">Enable ambient glow effects.</div>
+                </div>
+                <button class="toggle active" id="glowToggle"></button>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Animations</div>
+                    <div class="setting-description">Enable smooth page and button animations.</div>
+                </div>
+                <button class="toggle active" id="animationToggle"></button>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h2>Snow</h2>
+            <p>Customize the falling snow background.</p>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Snow</div>
+                    <div class="setting-description">Show or hide the falling snow.</div>
+                </div>
+                <button class="toggle active" id="snowToggle"></button>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Snow Amount</div>
+                    <div class="setting-description">Change how much snow appears.</div>
+                </div>
+
+                <div class="range-wrap">
+                    <input type="range" id="snowAmount" min="25" max="220" value="110">
+                    <span class="range-value" id="snowAmountValue">110</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h2>Cursor</h2>
+            <p>Choose a custom mouse cursor for Schooly.</p>
+
+            <div class="cursor-grid">
+                <button class="cursor-option active" data-cursor="default">Default</button>
+                <button class="cursor-option" data-cursor="dot">Glow Dot</button>
+                <button class="cursor-option" data-cursor="purple-ring">Purple Ring</button>
+                <button class="cursor-option" data-cursor="crosshair">Crosshair</button>
+                <button class="cursor-option" data-cursor="soft">Soft Glow</button>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h2>Accessibility</h2>
+            <p>Make Schooly more comfortable to use.</p>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Reduce Motion</div>
+                    <div class="setting-description">Reduce transitions and animations.</div>
+                </div>
+                <button class="toggle" id="reduceMotionToggle"></button>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">High Contrast</div>
+                    <div class="setting-description">Increase contrast between interface elements.</div>
+                </div>
+                <button class="toggle" id="contrastToggle"></button>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h2>Background</h2>
+            <p>Adjust the darkness of the Schooly background.</p>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Background Darkness</div>
+                    <div class="setting-description">Adjust how dark the background appears.</div>
+                </div>
+
+                <div class="range-wrap">
+                    <input type="range" id="darkness" min="0" max="100" value="70">
+                    <span class="range-value" id="darknessValue">70%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <h2>Settings Data</h2>
+            <p>Reset Schooly back to its default settings.</p>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <div class="setting-name">Reset Settings</div>
+                    <div class="setting-description">Restore all Schooly settings to their defaults.</div>
+                </div>
+
+                <button class="back-button" id="resetSettings">Reset</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="settings-footer">
+        Schooly • Settings are saved automatically
+    </div>
+</section>
+
+<section id="policyPage" class="page">
+    <header class="page-header">
+        <div class="page-title">Schooly Policy</div>
+        <button class="back-button" data-back>← Home</button>
+    </header>
+
+    <div class="policy-page-content">
+        <div class="policy-card">
+            <div class="policy-updated">Schooly • General site policy</div>
+
+            <h2>Purpose</h2>
+            <p>Schooly is a personal web project that brings games, movies, music, settings, and other features into one website.</p>
+
+            <h2>User responsibility</h2>
+            <p>Use Schooly responsibly and follow the laws, rules, and terms that apply to the services or content you access through it.</p>
+
+            <h2>Third-party content</h2>
+            <p>Some Schooly features may display or access content provided by third-party services. Schooly does not claim ownership of third-party names, artwork, videos, music, or other content.</p>
+
+            <h2>Availability</h2>
+            <p>Features can change, stop working, or become unavailable when a third-party service changes its website, API, policies, or availability.</p>
+
+            <h2>Content concerns</h2>
+            <p>Do not use Schooly to intentionally distribute content that you do not have permission to distribute. Third-party content remains subject to the rights and terms of its respective owners and providers.</p>
+
+            <h2>Privacy</h2>
+            <p>Schooly should only collect or store information that is intentionally added by the site's owner or by features that explicitly require it. Review the privacy behavior of any third-party service you use through Schooly.</p>
+
+            <h2>Changes</h2>
+            <p>This policy may be updated as Schooly changes. The current version shown on this page is the version intended to apply to the site.</p>
+        </div>
+    </div>
+</section>
+
+<section id="legalPage" class="page">
+    <header class="page-header">
+        <div class="page-title">Legal Information</div>
+        <button class="back-button" data-back>← Home</button>
+    </header>
+
+    <div class="policy-page-content">
+        <div class="policy-card">
+            <div class="policy-updated">Schooly • Legal information</div>
+
+            <h2>Website and branding</h2>
+            <p>Schooly and its original interface design, code, graphics, and text are part of this project unless otherwise noted.</p>
+
+            <h2>Third-party trademarks</h2>
+            <p>Names, logos, trademarks, and service marks shown through third-party integrations belong to their respective owners and are not claimed by Schooly.</p>
+
+            <h2>Third-party services</h2>
+            <p>When Schooly links to, embeds, or communicates with another service, that service's own terms, privacy policy, licenses, and content rules may also apply.</p>
+
+            <h2>Copyright</h2>
+            <p>Schooly does not grant permission to copy or redistribute third-party copyrighted material merely because it can be accessed through the site.</p>
+
+            <h2>Disclaimer</h2>
+            <p>Schooly is provided for informational and entertainment purposes. Features are provided as-is and may not always be available or error-free.</p>
+
+            <h2>Contact</h2>
+            <p>For project-specific legal or copyright questions, use the contact method provided by the site's owner.</p>
+
+            <h2>Legal notice</h2>
+            <p>This page is general website information and is not legal advice. A qualified attorney should be consulted for legal questions specific to your project or jurisdiction.</p>
+        </div>
+    </div>
+</section>
+
+<section id="contactPage" class="page">
+    <header class="page-header">
+        <div class="page-title">Contact Schooly</div>
+        <button class="back-button" data-back>← Home</button>
+    </header>
+
+    <div class="contact-card">
+        <div class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/>
+                <path d="m5 7 7 5 7-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <h2>Have an idea for Schooly?</h2>
+        <p>
+            I’m always open to suggestions that could make Schooly more useful,
+            easier to use, or just more fun. If you have an idea for a new feature,
+            something you think should be changed, or feedback about the site,
+            send me a message.
+        </p>
+
+        <div class="contact-suggestion">
+            <strong>Suggestions are welcome.</strong><br>
+            Tell me what you would like to see added or improved on Schooly.
+            There’s no need for your message to be formal — just send your idea.
+        </div>
+
+        <a class="contact-email" href="mailto:jck123ge@gmail.com?subject=Schooly%20Suggestion">
+            ✉ Email Me
+        </a>
+
+        <div class="contact-address">jck123ge@gmail.com</div>
+    </div>
+</section>
+
+</div>
+
+<script>
+const pages = document.querySelectorAll(".page");
+const body = document.body;
+
+function showPage(pageId){
+    pages.forEach(page => page.classList.remove("active"));
+    const target = document.getElementById(pageId);
+    if(target) target.classList.add("active");
+    window.scrollTo(0,0);
+}
+
+document.querySelectorAll("[data-page]").forEach(button=>{
+    button.addEventListener("click",()=>{
+        showPage(button.dataset.page);
+    });
+});
+
+document.querySelectorAll("[data-back]").forEach(button=>{
+    button.addEventListener("click",()=>{
+        showPage("homePage");
+    });
+});
+
+/* Movies iframe fullscreen */
+const movieFrame = document.getElementById("movieFrame");
+const movieFullscreen = document.getElementById("movieFullscreen");
+
+movieFullscreen.addEventListener("click", async ()=>{
+    try{
+        if(document.fullscreenElement){
+            await document.exitFullscreen();
+        }else if(movieFrame.requestFullscreen){
+            await movieFrame.requestFullscreen();
+        }
+    }catch(error){
+        console.error("Fullscreen error:", error);
+    }
+});
+
+/* Music page intentionally blank until local songs are added. */
+const musicFullscreen = document.getElementById("musicFullscreen");
+if(musicFullscreen){
+    musicFullscreen.addEventListener("click", async()=>{
+        try{
+            if(document.fullscreenElement) await document.exitFullscreen();
+            else if(document.getElementById("musicPage")?.requestFullscreen) await document.getElementById("musicPage").requestFullscreen();
+        }catch(error){console.error("Music fullscreen error:",error);}
+    });
+}
+
+/* 3D spinning Schooly logo + mouse tilt */
+const brand = document.getElementById("brand");
+
+let brandMouseX = 0;
+let brandMouseY = 0;
+let brandHovered = false;
+
+brand.addEventListener("pointermove",e=>{
+    const rect = brand.getBoundingClientRect();
+    brandMouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    brandMouseY = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    brandHovered = true;
+});
+
+brand.addEventListener("pointerleave",()=>{
+    brandMouseX = 0;
+    brandMouseY = 0;
+    brandHovered = false;
+});
+
+let brandSpin = -12;
+
+function animateBrand(){
+    brandSpin = (brandSpin + 0.75) % 360;
+
+    const tiltX = brandHovered ? brandMouseY * -7 : 0;
+    const tiltY = brandHovered ? brandMouseX * 9 : 0;
+    const scale = brandHovered ? 1.035 : 1;
+
+    brand.style.transform =
+        `perspective(1000px) rotateX(${7 + tiltX}deg) rotateY(${brandSpin + tiltY}deg) scale(${scale})`;
+
+    requestAnimationFrame(animateBrand);
+}
+
+animateBrand();
+
+/* Themes */
+const themes = {
+    purple:{
+        bg:"#050308",panel:"rgba(18,9,28,.82)",
+        primary:"#9b5cff",primaryBright:"#bd8cff",
+        primaryDark:"#54248c",text:"#fff",
+        textSecondary:"#b9afc5",muted:"#776c82",
+        border:"rgba(166,102,255,.22)",
+        buttonBg:"rgba(255,255,255,.045)",
+        shadow:"rgba(124,58,237,.32)"
+    },
+    blue:{
+        bg:"#02050b",panel:"rgba(5,15,28,.82)",
+        primary:"#4f9cff",primaryBright:"#91c2ff",
+        primaryDark:"#194f92",text:"#fff",
+        textSecondary:"#b6c4d7",muted:"#687689",
+        border:"rgba(79,156,255,.22)",
+        buttonBg:"rgba(255,255,255,.045)",
+        shadow:"rgba(36,99,235,.3)"
+    },
+    emerald:{
+        bg:"#020806",panel:"rgba(5,21,14,.82)",
+        primary:"#35d69b",primaryBright:"#78efc0",
+        primaryDark:"#147b58",text:"#fff",
+        textSecondary:"#b2cabf",muted:"#667e73",
+        border:"rgba(53,214,155,.22)",
+        buttonBg:"rgba(255,255,255,.045)",
+        shadow:"rgba(16,185,129,.28)"
+    },
+    red:{
+        bg:"#090303",panel:"rgba(27,8,8,.82)",
+        primary:"#ff4f63",primaryBright:"#ff9aa6",
+        primaryDark:"#932030",text:"#fff",
+        textSecondary:"#d3b9bc",muted:"#83686d",
+        border:"rgba(255,79,99,.22)",
+        buttonBg:"rgba(255,255,255,.045)",
+        shadow:"rgba(220,38,38,.3)"
+    },
+    pink:{
+        bg:"#090308",panel:"rgba(27,8,19,.82)",
+        primary:"#ff62b0",primaryBright:"#ffa5d2",
+        primaryDark:"#93265e",text:"#fff",
+        textSecondary:"#d8bdcc",muted:"#856d7b",
+        border:"rgba(255,98,176,.22)",
+        buttonBg:"rgba(255,255,255,.045)",
+        shadow:"rgba(236,72,153,.3)"
+    },
+    orange:{
+        bg:"#090503",panel:"rgba(28,12,5,.82)",
+        primary:"#ff873d",primaryBright:"#ffc08e",
+        primaryDark:"#934a1a",text:"#fff",
+        textSecondary:"#d7c1b1",muted:"#836f61",
+        border:"rgba(255,135,61,.22)",
+        buttonBg:"rgba(255,255,255,.045)",
+        shadow:"rgba(249,115,22,.29)"
+    },
+    mono:{
+        bg:"#050505",panel:"rgba(18,18,18,.84)",
+        primary:"#eee",primaryBright:"#fff",
+        primaryDark:"#666",text:"#fff",
+        textSecondary:"#bdbdbd",muted:"#777",
+        border:"rgba(255,255,255,.16)",
+        buttonBg:"rgba(255,255,255,.045)",
+        shadow:"rgba(255,255,255,.14)"
+    }
+};
+
+function applyTheme(name){
+    const theme = themes[name] || themes.purple;
+    const root = document.documentElement;
+
+    Object.entries(theme).forEach(([key,value])=>{
+        const cssName = "--" + key.replace(/[A-Z]/g,m=>"-"+m.toLowerCase());
+        root.style.setProperty(cssName,value);
+    });
+
+    localStorage.setItem("schooly-theme",name);
+}
+
+const themeSelect = document.getElementById("themeSelect");
+const savedTheme = localStorage.getItem("schooly-theme") || "purple";
+themeSelect.value = savedTheme;
+applyTheme(savedTheme);
+
+themeSelect.addEventListener("change",e=>{
+    applyTheme(e.target.value);
+});
+
+/* Toggles */
+function setupToggle(id,key,defaultValue,onChange){
+    const element = document.getElementById(id);
+    let saved = localStorage.getItem(key);
+    let enabled = saved === null ? defaultValue : saved === "true";
+
+    function update(){
+        element.classList.toggle("active",enabled);
+        localStorage.setItem(key,enabled);
+        onChange(enabled);
+    }
+
+    element.addEventListener("click",()=>{
+        enabled = !enabled;
+        update();
+    });
+
+    update();
+}
+
+setupToggle("glowToggle","schooly-glow",true,enabled=>{
+    const theme = themes[localStorage.getItem("schooly-theme") || "purple"];
+    document.documentElement.style.setProperty(
+        "--shadow",
+        enabled ? theme.shadow : "transparent"
+    );
+});
+
+setupToggle("animationToggle","schooly-animation",true,enabled=>{
+    body.classList.toggle("no-animations",!enabled);
+});
+
+setupToggle("reduceMotionToggle","schooly-reduce-motion",false,enabled=>{
+    body.classList.toggle("no-animations",enabled);
+});
+
+setupToggle("contrastToggle","schooly-contrast",false,enabled=>{
+    const theme = themes[localStorage.getItem("schooly-theme") || "purple"];
+
+    document.documentElement.style.setProperty(
+        "--border",
+        enabled ? "rgba(255,255,255,.36)" : theme.border
+    );
+
+    document.documentElement.style.setProperty(
+        "--text-secondary",
+        enabled ? "#eee" : theme.textSecondary
+    );
+});
+
+/* UI scale */
+const uiScale = document.getElementById("uiScale");
+const uiScaleValue = document.getElementById("uiScaleValue");
+uiScale.value = localStorage.getItem("schooly-ui-scale") || "100";
+
+function updateUIScale(){
+    const value = Number(uiScale.value);
+    uiScaleValue.textContent = value + "%";
+    localStorage.setItem("schooly-ui-scale",value);
+
+    document.documentElement.style.setProperty(
+        "--ui-scale",value/100
+    );
+}
+
+uiScale.addEventListener("input",updateUIScale);
+updateUIScale();
+
+/* Darkness */
+const darkness = document.getElementById("darkness");
+const darknessValue = document.getElementById("darknessValue");
+darkness.value = localStorage.getItem("schooly-darkness") || "70";
+
+function updateDarkness(){
+    const value = Number(darkness.value);
+    darknessValue.textContent = value + "%";
+
+    const brightness = 1 - (value/100)*.78;
+    document.body.style.filter = `brightness(${brightness})`;
+
+    localStorage.setItem("schooly-darkness",value);
+}
+
+darkness.addEventListener("input",updateDarkness);
+updateDarkness();
+
+/* Snow */
+const snowCanvas = document.getElementById("snowCanvas");
+const snowCtx = snowCanvas.getContext("2d");
+let snowflakes = [];
+
+let mouseX = window.innerWidth * 0.5;
+let mouseY = window.innerHeight * 0.35;
+let smoothMouseX = mouseX;
+let smoothMouseY = mouseY;
+
+window.addEventListener("pointermove",e=>{
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    const px = (mouseX / Math.max(window.innerWidth,1)) * 100;
+    const py = (mouseY / Math.max(window.innerHeight,1)) * 100;
+    document.documentElement.style.setProperty("--mouse-x", px + "%");
+    document.documentElement.style.setProperty("--mouse-y", py + "%");
+});
+
+let snowEnabled =
+    localStorage.getItem("schooly-snow") === null
+    ? true
+    : localStorage.getItem("schooly-snow") === "true";
+
+let snowAmount =
+    Number(localStorage.getItem("schooly-snow-amount") || 110);
+
+function resizeSnowCanvas(){
+    const dpr = Math.min(window.devicePixelRatio || 1,2);
+
+    snowCanvas.width = window.innerWidth*dpr;
+    snowCanvas.height = window.innerHeight*dpr;
+    snowCanvas.style.width = window.innerWidth+"px";
+    snowCanvas.style.height = window.innerHeight+"px";
+
+    snowCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function createSnowflake(randomY=true){
+    return {
+        x:Math.random()*window.innerWidth,
+        y:randomY ? Math.random()*window.innerHeight : -10,
+        radius:Math.random()*1.7+.6,
+        speed:Math.random()*.65+.35,
+        drift:Math.random()*.55-.275,
+        opacity:Math.random()*.6+.25,
+        phase:Math.random()*Math.PI*2
+    };
+}
+
+function rebuildSnow(){
+    snowflakes=[];
+
+    if(!snowEnabled) return;
+
+    for(let i=0;i<snowAmount;i++){
+        snowflakes.push(createSnowflake(true));
+    }
+}
+
+function drawSnow(){
+    snowCtx.clearRect(
+        0,0,
+        window.innerWidth,
+        window.innerHeight
+    );
+
+    if(snowEnabled){
+        smoothMouseX += (mouseX - smoothMouseX) * 0.055;
+        smoothMouseY += (mouseY - smoothMouseY) * 0.055;
+
+        for(const flake of snowflakes){
+            flake.y += flake.speed;
+
+            flake.x +=
+                Math.sin(Date.now()*.001+flake.phase)*.08
+                + flake.drift;
+
+            /* Let nearby snow softly bend and swirl around the cursor. */
+            const dx = flake.x - smoothMouseX;
+            const dy = flake.y - smoothMouseY;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            const influence = Math.max(0, 1 - distance / 190);
+
+            if(influence > 0){
+                const swirl = influence * 0.95;
+                flake.x += (-dy / Math.max(distance,1)) * swirl;
+                flake.y += ( dx / Math.max(distance,1)) * swirl * 0.35;
+                flake.x += (smoothMouseX - flake.x) * influence * 0.012;
+                flake.y += (smoothMouseY - flake.y) * influence * 0.004;
+            }
+
+            if(flake.y > window.innerHeight+10){
+                flake.y=-10;
+                flake.x=Math.random()*window.innerWidth;
+            }
+
+            if(flake.x < -10) flake.x=window.innerWidth+10;
+            if(flake.x > window.innerWidth+10) flake.x=-10;
+
+            snowCtx.beginPath();
+            snowCtx.arc(
+                flake.x,
+                flake.y,
+                flake.radius,
+                0,
+                Math.PI*2
+            );
+
+            snowCtx.fillStyle =
+                `rgba(255,255,255,${flake.opacity})`;
+
+            snowCtx.fill();
+        }
+    }
+
+    requestAnimationFrame(drawSnow);
+}
+
+window.addEventListener("resize",()=>{
+    resizeSnowCanvas();
+    rebuildSnow();
+});
+
+resizeSnowCanvas();
+rebuildSnow();
+drawSnow();
+
+/* Snow controls */
+const snowToggle = document.getElementById("snowToggle");
+snowToggle.classList.toggle("active",snowEnabled);
+
+snowToggle.addEventListener("click",()=>{
+    snowEnabled = !snowEnabled;
+    snowToggle.classList.toggle("active",snowEnabled);
+    localStorage.setItem("schooly-snow",snowEnabled);
+    rebuildSnow();
+});
+
+const snowAmountInput = document.getElementById("snowAmount");
+const snowAmountValue = document.getElementById("snowAmountValue");
+
+snowAmountInput.value = snowAmount;
+
+function updateSnowAmount(){
+    snowAmount = Number(snowAmountInput.value);
+    snowAmountValue.textContent = snowAmount;
+    localStorage.setItem("schooly-snow-amount",snowAmount);
+    rebuildSnow();
+}
+
+snowAmountInput.addEventListener("input",updateSnowAmount);
+updateSnowAmount();
+
+/* Custom cursor */
+const cursor = document.getElementById("customCursor");
+const cursorButtons = document.querySelectorAll(".cursor-option");
+let currentCursor =
+    localStorage.getItem("schooly-cursor") || "default";
+
+function applyCursor(name){
+    body.classList.remove(
+        "cursor-dot",
+        "cursor-purple-ring",
+        "cursor-crosshair",
+        "cursor-soft"
+    );
+
+    cursor.classList.remove("active");
+
+    if(name !== "default"){
+        body.classList.add("cursor-"+name);
+        cursor.classList.add("active");
+    }
+
+    cursorButtons.forEach(button=>{
+        button.classList.toggle(
+            "active",
+            button.dataset.cursor === name
+        );
+    });
+
+    localStorage.setItem("schooly-cursor",name);
+}
+
+cursorButtons.forEach(button=>{
+    button.addEventListener("click",()=>{
+        applyCursor(button.dataset.cursor);
+    });
+});
+
+applyCursor(currentCursor);
+
+document.addEventListener("mousemove",e=>{
+    cursor.style.left = e.clientX+"px";
+    cursor.style.top = e.clientY+"px";
+});
+
+document.addEventListener("mouseover",e=>{
+    if(e.target.closest("button,select,input")){
+        body.classList.add("cursor-hover");
+    }
+});
+
+document.addEventListener("mouseout",e=>{
+    if(e.target.closest("button,select,input")){
+        body.classList.remove("cursor-hover");
+    }
+});
+
+/* Reset */
+document.getElementById("resetSettings").addEventListener("click",()=>{
+    if(!confirm("Reset all Schooly settings?")) return;
+
+    [
+        "schooly-theme",
+        "schooly-glow",
+        "schooly-animation",
+        "schooly-reduce-motion",
+        "schooly-contrast",
+        "schooly-ui-scale",
+        "schooly-darkness",
+        "schooly-snow",
+        "schooly-snow-amount",
+        "schooly-cursor"
+    ].forEach(key=>localStorage.removeItem(key));
+
+    location.reload();
+});
+</script>
+
+
+<!-- Schooly navigation safety fix -->
+<script>
+(function(){
+    function schoolyShowPage(pageId){
+        var allPages = document.querySelectorAll('.page');
+        var target = document.getElementById(pageId);
+        if(!target) return false;
+
+        allPages.forEach(function(page){
+            page.classList.remove('active');
+        });
+        target.classList.add('active');
+        window.scrollTo(0, 0);
+        return false;
+    }
+
+    document.addEventListener('click', function(event){
+        var button = event.target.closest('[data-page]');
+        if(button){
+            event.preventDefault();
+            event.stopPropagation();
+            schoolyShowPage(button.getAttribute('data-page'));
+            return;
+        }
+
+        var back = event.target.closest('[data-back]');
+        if(back){
+            event.preventDefault();
+            event.stopPropagation();
+            schoolyShowPage('homePage');
+        }
+    }, true);
+
+    window.schoolyShowPage = schoolyShowPage;
+})();
+</script>
+
+
+
+<div class="game-modal" id="gameModal" aria-hidden="true">
+    <div class="game-modal-box" role="dialog" aria-modal="true" aria-labelledby="gameModalTitle">
+        <div class="game-modal-toolbar">
+            <div class="game-modal-title" id="gameModalTitle">Game</div>
+            <div class="game-modal-actions">
+                <button type="button" id="gameFullscreen">⛶ Fullscreen</button>
+                <button type="button" id="gameClose">✕ Close</button>
+            </div>
+        </div>
+        <iframe id="gameFrame" title="Game player" allow="fullscreen; autoplay; gamepad; pointer-lock" allowfullscreen></iframe>
+    </div>
+</div>
+
+<script>
+/* Featured games */
+(function(){
+    const modal = document.getElementById("gameModal");
+    const frame = document.getElementById("gameFrame");
+    const title = document.getElementById("gameModalTitle");
+    const close = document.getElementById("gameClose");
+    const fullscreen = document.getElementById("gameFullscreen");
+
+    if(!modal || !frame) return;
+
+    function openGame(card){
+        const url = card.getAttribute("data-game-url");
+        const name = card.getAttribute("data-game-title") || "Game";
+        if(!url) return;
+
+        title.textContent = name;
+        frame.src = "about:blank";
+        requestAnimationFrame(() => {
+            frame.src = url;
+        });
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden","false");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeGame(){
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden","true");
+        frame.src = "about:blank";
+        document.body.style.overflow = "";
+    }
+
+    document.querySelectorAll(".game-card").forEach(card=>{
+        card.addEventListener("click",function(event){
+            if(event.target.closest(".game-play-button") || event.target.closest(".game-thumb")){
+                openGame(card);
+            }
+        });
+    });
+
+    close.addEventListener("click",closeGame);
+
+    modal.addEventListener("click",function(event){
+        if(event.target === modal) closeGame();
+    });
+
+    document.addEventListener("keydown",function(event){
+        if(event.key === "Escape" && modal.classList.contains("open")){
+            closeGame();
+        }
+    });
+
+    fullscreen.addEventListener("click",async function(){
+        try{
+            if(document.fullscreenElement){
+                await document.exitFullscreen();
+            }else if(frame.requestFullscreen){
+                await frame.requestFullscreen();
+            }
+        }catch(error){
+            console.error("Game fullscreen error:",error);
+        }
+    });
+})();
+</script>
+
+</body>
+</html>
